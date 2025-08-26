@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>Page title</title>
+    <style>
+input[type='text'] {
+    width: 60%;
+    outline: none;
+   border: 2px solid blue;
+   border-radius: 10px;
+   padding: 6px;
+}
+
+select {
+    width: 25%;
+    outline: none;
+    border-radius: 10px;
+    border: 2px solid blue; 
+    padding: 6px;      
+}
+
+input[type='submit'] { 
+padding: 10px;
+border-radius: 15px;
+border: 2px solid blue;
+background: blue;
+color: white;
+font-weight: bold;
+}
+
+#btn-center {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+    </style>
+</head>
+<body>
+<main> 
+<h2>Welcome to Library Utilities!</h2>   
+<p>Download your JAVASCRIPT and PHP library with ease</p>    
+   <form id="form">
+<input type="text" pattern="^\d+\.\d+\.\d+$" placeholder="Enter version number (e.g., 1.0.0)" id="version">
+<select id="select" required>
+    <option selected disabled value="">SELECT ONE</option>
+    <option value="JAVASCRIPT">JAVASCRIPT</option>
+    <option value="PHP">PHP</option>
+</select><br> 
+<div id="btn-center">
+<input type="submit" value="Download">  
+</div>
+   </form> 
+   </main>
+   <script>
+const input = document.getElementById('version');
+const select = document.getElementById('select');
+input.oninput = function () {
+input.value = input.value.replace(/[a-zA-Z]/g, '').trim(); 
+}
+
+document.getElementById('form').onsubmit = function (e) {
+e.preventDefault();
+let respiratory = select.value === 'JAVASCRIPT' ? 'jutils' : 'putils';
+window.location.href = `https://github.com/utilitiescode/${respiratory}/archive/refs/tags/${input.value}.zip`;
+}
+   </script>   
+</body>
+</html>
+
