@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>My Calculator</title>
+    <style>
+#screen {
+    resize: none;
+    text-align: right;  
+    padding: 23px; 
+    border-radius: 5px;  
+    color: black;   
+    background: white;
+} 
+
+ #container {   
+    position: fixed;
+    top: 0;
+    background: white;
+    width: 100%;
+    box-sizing: border-box;
+    box-shadow: 0px 0px 10px 5px rgba(6, 3, 0, 0.2);
+    padding: 15px;       
+}  
+
+html, body {
+    background: white;
+    color: black;
+    margin: 0;
+    padding: 0;  
+    background: black;  
+} 
+
+main {    
+    margin-top: 100px;        
+} 
+
+.menu {
+    float: right;
+}  
+
+.appname {
+ font-size: 2em;
+ color: black;
+ font-weight: bold;
+ font-size: 2.4em;
+} 
+
+#logic {
+   text-align: center;   
+}
+
+button {
+    margin: 3px;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid green;
+    cursor: pointer;    
+}
+
+.switch-bg {
+    background: black;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid green;
+}
+
+
+#del {
+    background: yellow;    
+} 
+
+#ac {
+    background: red;
+    color: white;
+}
+
+#cal {
+    background: green;
+    color: white;
+}
+    </style>
+</head>
+<body>
+  <header>
+      <nav id="container">
+<span class="appname">My Calculator <span class="menu">⋮</span></span>  
+</nav>    
+  </header>  
+  
+  <main>
+    <nav id="logic">   
+      <!-- Calculator screen -->
+     <textarea id="screen" placeholder="0" disabled></textarea><br>
+ 
+ <div style="background: orange; display: inline-block; border-radius: 7px; padding: 7px;">
+  <button id="ac">AC</button>
+  <button id="del">DEL</button>
+ <span class="switch-bg">🌙☀</span><br> 
+ 
+  <button class="btn">7</button>
+  <button class="btn">9</button>
+  <button class="btn">8</button>
+  <button class="btn">/</button><br>  
+  
+  <button class="btn">4</button>
+  <button class="btn">6</button>
+  <button class="btn">5</button>  
+  <button class="btn">*</button><br>  
+  
+  <button class="btn">1</button>
+  <button class="btn">3</button>
+  <button class="btn">2</button>  
+  <button class="btn">-</button><br>
+  
+  <button class="btn">.</button>
+  <button class="btn">0</button>
+  <button id="cal">=</button>  
+  <button class="btn">+</button>
+ </div>
+ </nav>   
+  <script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.4/jutils.js"></script>
+    <script>
+  const screen = $('#screen');   
+const btn = $('.btn', true);
+// handle button click operation 
+btn.each((button) => {
+    $(button).click(() => {
+    screen.css('color', 'black');
+
+const currentValue = screen.val();
+const buttonValue = $(button).text();
+
+   // Check for multiple decimal points
+    if (buttonValue === '.' && currentValue.includes('.')) {
+      return;
+    } 
+
+      // Check for consecutive operators
+    if (['+', '/', '-', '*'].includes(buttonValue) && ['+', '/', '-', '*'].includes(currentValue.slice(-1))) { 
+     screen.val(currentValue.replace(currentValue.slice(-1), buttonValue));
+  return; 
+    } 
+    
+    
+    // Remove leading zeros
+    if (buttonValue === '0' && currentValue === '0') {
+      return;
+    }
+     
+              
+ screen.val(currentValue.replace(/Invalid operation|Can't divide by 0/, '') + buttonValue);          
+    });
+});
+
+
+const cal = $('#cal');
+// handle calculate btn operation 
+cal.click(() => {    
+if(!$.empty(screen.val())) {
+try {
+screen.val(eval(screen.val()).toString().includes('Infinity') ? errMessage("Can't divide by 0", 'red') : eval(screen.val()));
+} catch {
+errMessage('Invalid operation', 'red');
+}
+}
+});
+
+// show error message on invalid input
+function errMessage(text, color) {
+screen.val(text);
+screen.css('color', color);   
+}
+
+
+// handle DEL btn click 
+$('#del').click(() => {
+screen.css('color', 'black');
+const currentValue = screen.val().replace(/Invalid operation|Can't divide by 0/, '');  
+if(currentValue.length > 0) {
+screen.val(currentValue.slice(0, -1));    
+} else {
+    screen.val(currentValue);
+}
+});
+
+
+// handle AC btn click 
+$('#ac').click(() => {
+screen.css('color', 'black'); 
+    screen.val('');
+})
+
+
+
+let flag = false;
+$('.switch-bg').click(() => {
+flag = !flag;
+if(flag) {
+btn.each((btn) => {
+$(btn).css({
+    background: 'black',
+    color: 'white'
+});   
+});    
+} else {
+    btn.each((btn) => {
+$(btn).css({
+    background: 'white',
+    color: 'black'
+});   
+});    
+}   
+});
+
+
+    </script>
+</body>
+</html>
