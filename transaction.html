@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <meta charset="UTF-8">
+    <title>Transaction History</title>
+    <style>
+  #container {
+    background: green; 
+    color: white;   
+    position: fixed;
+    width: 100%;
+    box-sizing: border-box;        
+    top: 0;
+    text-align: center;
+} 
+
+html, body {
+    padding: 0;
+    margin: 0; 
+    background: white;
+    color: black;
+}
+
+
+ #history {
+    padding: 20px;
+    font-weight: bold;
+    font-size: 1.5em;    
+}
+
+
+
+
+ #clear-history {              
+    cursor: pointer;    
+     border: none;
+    background: blue;      
+    color: white;
+    border-radius: 10px;
+    padding: 5px;
+    position: fixed;
+    right: 8px;
+    top: 75px;
+    display: none;
+}
+
+.dark-mode {
+    background: black;
+    color: white;
+}
+
+.dark-mode main {
+   background: black;
+    color: white; 
+}
+    </style>
+</head>
+<body>
+  <header>
+ <nav id="container">
+     <div id="history">
+<span style="float: left;" onclick="$.redirect('game.html')"><</span>
+<span>Transaction History</span>
+<div style="font-weight: bold; float: right; cursor: pointer;" onclick="$('#clear-history').toggle();">⋮</div>
+</div> 
+
+<button id="clear-history">Clear History</button>   
+ </nav>     
+  </header>
+  
+  <main style="margin-top: 80px;">
+<section>
+    <div id="result"></div>
+</section>      
+  </main>
+ <script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.5/jutils.js"></script> 
+    <script>
+ const clearHistory =  $('#clear-history')
+  clearHistory.hide();
+
+/* Logic to clear transaction history */  
+clearHistory.click(() => {
+   $.storage('storeHistory', ':REMOVE:');
+   $.reload();
+}); 
+  
+  
+const result = $('#result');
+const storeHistory = $.dataStore('storeHistory');
+$(document).ready(() => {
+$(storeHistory).each((item, index) => {
+if(item.depositAmt) {    
+$(':p').html(`<div style="background: orange; color: purple; border-radius: 10px; padding: 10px;">${item.date} You deposit <span style="color: black; font-weight: bold;">₦${item.depositAmt}</span></div>`).prependTo(result); 
+
+ } else if(item.lossAmt) {
+$(':p').html(`<div style="background: orange; color: purple; border-radius: 10px; padding: 10px;">${item.date} You wager <span style="color: black; font-weight: bold;">₦${item.amt}</span> Profit <span style="color: green; font-weight: bold;">₦0</span></div>`).prependTo(result); 
+ 
+} else if(item.oneProfit) {
+$(':p').html(`<div style="background: orange; color: purple; border-radius: 10px; padding: 10px;">${item.date} You wager <span style="color: black; font-weight: bold;">₦${item.amt}</span> Profit <span style="color: green; font-weight: bold;">₦${$.fixed(item.oneProfit)}</span></div>`).prependTo(result); 
+     
+} else if(item.twoProfit) {
+$(':p').html(`<div style="background: orange; color: purple; border-radius: 10px; padding: 10px;">${item.date} You wager <span style="color: black; font-weight: bold;">₦${item.amt}</span> Profit <span style="color: green; font-weight: bold;">₦${$.fixed(item.twoProfit)}</span></div>`).prependTo(result);      
+} 
+});   
+});
+
+
+
+/* switch background color on DOMContentLoaded */
+$(document).ready(() => {
+if($.storage('switchBg') === 'true') {
+$('html, body').addClass('dark-mode');    
+}    
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">   
+    <meta charset="UTF-8">
+    <title>Betting</title>
+    <style>
+#container {
+    background: green; 
+    color: white;   
+    position: fixed;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 35px;  
+    border-radius: 0 0 15px 15px;
+    top: 0;
+} 
+
+html, body {
+    padding: 0;
+    margin: 0;
+    background: white;
+    color: black;
+}
+
+#history {
+    border-radius: 20px;
+    border: none;
+    margin-bottom: 10px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+#add-balance {
+    background: blue;
+    border-radius: 20px;
+    color: white;
+    border: none; 
+    padding: 5px; 
+    cursor: pointer;     
+}  
+
+.space {
+  display: flex; 
+  justify-content: space-around;
+} 
+
+.switch-bg {    
+    padding: 5px;
+    display: inline;
+    position: fixed;
+    right: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    background: white;
+    box-shadow: 0px 5px 10px 5px rgba(6, 3, 0, 0.2);    
+}
+
+.switch-bg > span {
+    background: black;
+    padding: 3px;
+    border-radius: 10px;
+}
+
+.bold-text {
+    font-weight: bold;
+}
+
+.unbold-text {
+    font-weight: normal;
+}
+
+#bet-btn {
+border: none;
+background: blue;    
+color: white;
+padding: 10px;
+display: inline;
+width: 70px;
+border-radius: 10px;
+cursor: pointer;
+}
+
+.dark-mode {
+    background: black;
+    color: white;
+}
+
+.dark-mode main {
+   background: black;
+    color: white; 
+}
+    </style>
+</head>
+<body>
+    <header>
+   <nav id="container">          
+<div class="space"> 
+<span>🏷Available Balance</span>
+<button id="history" onclick="$.redirect('transaction.html')">Transaction History</button>
+</div>
+
+<div class="space">
+<span>₦<span id="balance" style="font-size: 2em;">0.00</span></span>
+<button id="add-balance">+Add Balance</button>
+</div>
+</nav>
+    </header>
+    
+<main style="margin-top: 150px; display: flex; justify-content: center; text-align: center;">
+<section>   
+   <button class="switch-bg"><span>☀🌙</span></button>  
+   <h1 style="margin-top: 30px;">Select Range Outcome</h1>
+<div style="display: flex; justify-content: space-around;"><span>Range 1</span> <span>Range 2</span></div>
+<input type="range" min="0" max="100" value="0" id="range1"> <input type="range" min="0" max="100" value="0" id="range2">
+<div style="display: flex; justify-content: space-around;"><span id="range1-val">0</span> <span id="range2-val">0</span></div>
+
+<div style="margin-top: 30px;">
+<div class="bold-text">Bet Amount: <span id="user-bet" class="unbold-text">0</span></div><br>   
+<div class="bold-text">Profit: <span id="bet-profit" class="unbold-text">0</span></div><br>
+<div class="bold-text">Outcome range</div><br>
+<input type="number" disabled style="padding: 10px; color: blue; font-weight: bold; background: #86ff6a; border: none" id="range-outcome"><p>
+<button id="bet-btn">Bet</button>
+</div>
+</section>   
+</main>    
+<script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.5/jutils.js"></script> 
+<script>
+const range1 = $('#range1');
+const range2 = $('#range2');
+const range1Val = $('#range1-val');
+const range2Val = $('#range2-val');
+const balance = $('#balance');
+const currentDate = $.date().locale();
+
+range1.input(() => {
+   range1Val.text(range1.val());
+});
+
+range2.input(() => {
+   range2Val.text(range2.val());
+});   
+
+
+const addBal = $('#add-balance');
+/* update user balance */
+addBal.click(async () => {
+const e = await $.prompt('Enter Deposit Amount');
+       if(e.action && !$.empty(e.value) && !isNaN(e.value) && e.value > 0) {
+balance.text($.fixed($.float(balance.text()) + $.float(e.value)));
+$.dataStore('storeHistory', {depositAmt: $.float(e.value), date: currentDate});
+$.storage('balance', $.float(balance.text()));  
+}     
+});
+
+
+const rangeOutcome = $('#range-outcome');
+const betBtn = $('#bet-btn');
+betBtn.click(async () => {
+const e = await $.prompt('Bet Amount: min. 100, max. 5000');
+
+if(e.action && !$.empty(e.value) && !isNaN(e.value) && e.value > 0) {
+if(range1.val() != 0 || range2.val() != 0) {
+if($.float(balance.text()) >= $.float(e.value)) {
+if($.float(e.value) >= 100 && $.float(e.value) <= 5000) {
+updateBetOutcome(e.value);      
+} else {
+  $.alert('Invalid wager. Minimum stake is 100, maximum stake is 5000');
+}
+} else {
+   $.alert('Insufficient fund');
+}
+} else {
+$.alert('Please enter a range value');  
+}
+} 
+});
+
+
+
+const userBet = $('#user-bet');
+const betProfit = $('#bet-profit');
+function updateBetOutcome(amount) {
+const range1Outcome = range1.val();
+const range2Outcome = range2.val();
+const randomInt = $.randInt(0, 100);
+rangeOutcome.val(randomInt == '0' ? '0' : randomInt);
+
+userBet.text($.fixed(amount));
+ if(range1Outcome == randomInt && range2Outcome == randomInt) {
+betProfit.html(`<span style="color: green;">+${amount * 1.3 - amount}</span>`);  
+balance.text($.fixed($.float(balance.text()) + $.float(amount * 1.3 - amount)));  
+$.storage('balance', balance.text());
+$.dataStore('storeHistory', {twoProfit: $.float(amount * 1.3 - amount), date: currentDate, amt: $.float(amount)});
+} else if(range1Outcome == randomInt || range2Outcome == randomInt) {
+betProfit.html(`<span style="color: green;">+${amount * 1.15 - amount}</span>`);
+balance.text($.fixed($.float(balance.text()) + $.float(amount * 1.15 - amount))); 
+$.dataStore('storeHistory', {oneProfit: $.float(amount * 1.15 - amount), date: currentDate, amt: $.float(amount)});
+$.storage('balance', balance.text());
+} else {
+betProfit.html(`<span style="color: red;">-${amount}</span>`);  
+balance.text($.fixed(balance.text() - amount)); 
+$.dataStore('storeHistory', {lossAmt: $.float(amount), date: currentDate, amt: $.float(amount)});
+$.storage('balance', balance.text());
+}  
+}
+
+ 
+ 
+/* switch background color on btn click */
+const switchBg = $('.switch-bg');
+switchBg.click(() => {
+$('html, body').toggleClass('dark-mode');
+$.storage('switchBg', $('html').hasClass('dark-mode'));
+});
+
+
+/* switch background color on DOMContentLoaded */
+$(document).ready(() => {
+if($.storage('switchBg') === 'true') {
+$('html, body').addClass('dark-mode');    
+}    
+});
+
+
+/* show user past save balance on DOMContentLoaded */
+const saveBal = $.storage('balance');
+$(document).ready(() => {
+balance.text($.fixed($.float(saveBal) || 0));
+});
+
+</script>
+</body>
+</html>
