@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1">        
+    <meta charset="UTF-8">
+    <title>Certificate Generator</title>
+    <link rel="stylesheet" href="certificate.css">
+   </head>
+<body>
+    <header>
+<nav id="welcome">Certificate Of Achievement. 🏅🏅🏅</nav>           
+    </header>
+    
+    <main>
+        <section>  
+<form>                      
+<div>Enter recipient name*</div>            
+<input type="text" placeholder="Recipient's name to be printed on the certificate." minLength="10" maxLength="70" required><p>
+
+<span>Certificate Type*</span>
+<select required>
+    <option value="">SELECT TYPE</option>
+    <option value="Achievement">ACHIEVEMENT</option>
+    <option value="Honor">HONOR</option>
+    <option value="Completion">COMPLETION</option>
+    <option value="Participation">PARTICIPATION</option>  
+    <option value="CUSTOM">CUSTOM</option>  
+</select><p>  
+
+<div id="customType"></div>    
+    
+
+<div>Course/Event Name*</div>
+<input type="text" placeholder="Name of the course, event or program" minLength="3" maxLength="100" required><p>
+    
+<div>Date of completion or issuance*</div>    
+<input type="datetime-local" required><p>
+
+<div>Issuer*</div>
+<input type="text" placeholder="Name of the organization or institution issuing the certificate." minLength="3" maxLength="100" required><p>
+
+
+<div>Add optional institutional seal or logo</div>
+<input type="file" accept="image/*" id="file"><p>
+
+<div>Add optional text or quotes</div>
+<textarea placeholder="Option to add custom text or quotes" cols="40" rows="4"></textarea><p>
+
+<div class="centerBtn">    
+<button type="submit" id="generate-btn">Generate</button>
+</div><p>    
+</form>    
+</section>      
+    </main>
+    
+    <footer>
+        
+    </footer>  
+ <script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.7/jutils.js"></script>                
+<script src="certificate.js"></script>
+</body>
+</html>

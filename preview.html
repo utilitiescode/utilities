@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">        
+    <meta charset="UTF-8">
+    <title>Download Certificate as PDF</title>   
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
+    <style> 
+html, body {
+border-box: box-sizing; 
+margin: 0; 
+padding: 0;  
+} 
+          
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 1rem auto;
+      display: block;
+    }
+    
+ #date {
+      font-weight: bold;
+      font-size: 1.3em;
+      margin-top: 7px
+    } 
+    
+       
+#download {
+outline: none;
+    padding: 10px;    
+    border-radius: 10px; 
+    background: blue; 
+    color: white;  
+    font-weight: bold;
+    border: none;
+}  
+
+main {
+    text-align: center;         
+} 
+
+#edit {
+    float: right;
+    border: none;    
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 20px;
+    background: white;
+    cursor: pointer;
+}
+
+.design {
+    position: fixed;
+    background: green;
+    padding: 10px;
+    width: 70%;
+    top: 0;
+    width: 100%;    
+}
+
+.design button:last-child {
+    float: right;
+    padding: 10px;
+    color: white;
+    background: green;
+    border: none;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.design > button {
+    padding: 5px;
+    border: none;
+    border-radius: 10px;
+}
+
+.out {
+    outline: none;
+}
+    </style>
+   </head>
+<body>  
+ <header>
+    <button id="edit">✏️</button>
+<div id="page1"></div>    
+<div id="page2"></div>
+    </header>    
+           
+<main>      
+<section>
+    <img id="institute-logo">                      
+  <h1 class="out">Certificate of <span id="certificateType" class="preview"></span></h1>      
+  <div class="out"><p>This certificate is awarded to <h3 id="name" class="preview"></h3> in appreciation of their involvement with <h2 id="eventName" class="preview"></h2></p></div>
+  
+  <div class="out">on the <p id="date" class="preview"></p></div>      
+        
+        <div class="out">Issued by: <b class="preview" id="institute"></b></div><p>
+        <i id="customNote" class="out"></i><p>       
+      </div>                     
+<button id="download">Download as PDF</button>             
+    </section>                 
+</main>
+<script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.7/jutils.js"></script>   
+<script>
+    // validate flag to verify user already fill details before visiting page 
+    if($.empty($.session('flag'))) {
+$.redirect('certificate.html');        
+    }
+
+// set the institution logo   
+  $('img').attr('src', $.session('img')); 
+  
+// set optional note 
+  $('#customNote').text($.session('customNote'));
+  
+// set the specify date
+const convertDate = $.date(new Date($.session('date'))).localeDate();  
+
+const splitDate = convertDate.split('/');
+const date = splitDate[1] == 1 ? 'st' : splitDate[1] == 2 ? 'nd' : splitDate[1] == 3 ? 'rd' : 'th';
+    
+$('#date').text(`${splitDate[1] + date} of ${$.getMonthName(new Date(convertDate))} ${splitDate[2]}`);
+
+// set the recipient name
+$('#name').text($.session('name'));
+  
+// set the institution name
+$('#institute').text($.session('institute'));
+
+// set the event name
+$('#eventName').text($.session('eventName')); 
+
+// set the certificate type
+$('#certificateType').text($.session('certificateType'));
+
+
+
+$('#download').click((e) => {
+  $(e.target).hide();
+  $('#edit').hide();
+
+  const { jsPDF } = window.jspdf;
+
+  // Capture the main content
+  html2canvas(document.querySelector('body'), {
+    scale: 2, // Increase scale for better quality
+    useCORS: true // Enable CORS if using external images
+  }).then((canvas) => {
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    const imgWidth = 190; // Width of the image in the PDF
+    const pageHeight = pdf.internal.pageSize.height;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+    let heightLeft = imgHeight;
+    let position = 0;
+
+    // Add the image to the PDF, handling multiple pages
+    while (heightLeft >= 0) {
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      position -= pageHeight;
+
+      // Move position down for next page
+      if (heightLeft >= 0) {
+        pdf.addPage(); // Add a new page if needed
+      }
+    }
+
+    pdf.save('download.pdf'); // Save the PDF
+   
+  });
+});
+const page1 = $('#page1');
+const page2 = $('#page2');
+let bgEdit;
+     
+ $('#edit').click(() => {   
+page1.show(); 
+page1.html(`
+<div class="design">   
+  <button onclick="editBg()">Background</button>
+<button onclick="fs()">Font Style</button>  
+<button onclick="frame()">Frame style</button> 
+<button onclick="editContent()" id="edit-content" style="background: ${bgEdit === undefined ? 'rgba(248, 248, 255, 1)' : 'purple'}">📝</button>
+<button id="hide-edit">X</button> 
+</div>     
+    `);  
+$('#hide-edit').click(() => {
+page1.hide();
+page2.hide();
+ });   
+ });
+
+
+// logic to change background and text color in real time
+function editBg() {
+page2.show();
+page2.html(`<div class="design">
+    <label style="color: white; font-weight: bold">Choose background color</label> 
+  <input type="color" style="width: 80px;" id="bg-color"><br><br>
+<label style="color: white; font-weight: bold">Choose text color</label>  
+<input type="color" style="width: 80px;" id="text-color"><br><br> 
+
+<div style="display: flex; justify-content: flex-end">
+<button style="background: none; border: none; font-size: 1.5em" id="hide-design">❌</button>
+<button style="font-size: 1.5em" id="save-design">✅</button>
+</div>
+    </div>`);
+const textColor = $('#text-color');  
+const bgColor = $('#bg-color');  
+
+// initiate to get the current color 
+let originalBgColor = $.session('bg') || bgColor.css('backgroundColor');
+let originalTextColor = $.session('text') ||  textColor.css('color'); 
+
+// cancel current color apply 
+$('#hide-design').click(() => {
+$('body').css('background', originalBgColor);
+$('body').css('color', originalTextColor);
+page2.hide();
+page1.show();
+});
+
+// set background color on change 
+bgColor.on('change', (e) => {
+$('body').css('background', bgColor.val());
+$.session('bg', e.target.value);
+});
+
+// set text color on change 
+textColor.on('change', (e) => {
+$('body').css('color', textColor.val());
+$.session('text', e.target.value);
+});
+
+// save current color apply
+$('#save-design').click(() => {
+page2.hide();
+page1.show();
+});     
+}
+
+
+
+// logic for handling frame border radius 
+function frame() {
+let intervalId;
+page2.show();
+page2.html(`
+<div class="design">
+<p>Choose frame</p> 
+<button id="img-frame">Image Frame</button> 
+<button id="border-frame">Border Frame</button>
+<div style="display: flex; justify-content: flex-end">
+<button style="background: none; border: none; font-size: 1.5em" id="hide-design">❌</button>
+<button style="font-size: 1.5em" id="save-design">✅</button>
+</div>
+</div>   
+    `);
+
+
+// onclick set image frame
+$('#img-frame').click(() => {
+  page2.html(`
+    <div class="design">
+      <b style="color: white">Select one to add frame</b>
+      <select style="padding: 10px; outline: none;" id="frame-select">
+        <option disabled selected value="">Select one</option>
+        <option value="Institution Logo">Institution Logo</option>
+        <option value="Upload">Upload</option> 
+        <option value="None">None</option>       
+      </select>
+      <button style="background: none; font-size: 1.4em;" onclick="page2.hide(); page1.show();">✅</button>
+      <input type="file" id="frame-upload" style="display: none;">
+    </div>
+  `);
+
+  const select = $('#frame-select');
+  const fileInput = $('#frame-upload');
+
+  select.on('change', () => {  
+  if(select.val() === 'None') {  
+$('main').css('background-image', 'none');      
+  } else if (select.val() === 'Institution Logo') {
+      $('main').css('background-image', `url(${$.session('img')})`);
+    } else {
+      fileInput.unwrap().click(); // trigger the file input element
+    }
+  });
+
+  fileInput.on('change', (e) => {
+    const selectedFile = e.target.files[0];
+    // handle the uploaded file
+    const reader = new FileReader();
+    reader.onload = () => {
+      $('main').css('background-image', `url(${reader.result})`);
+    };
+    reader.readAsDataURL(selectedFile);
+  });     
+});
+
+
+// onclick set border frame
+$('#border-frame').click(() => {
+page2.html(`
+<div class="design">
+<b style="color: white">Border Width</b>   
+<input type="number" id="border-width" style="padding: 5px; border-radius: 10px; outline: none"><br>
+
+<b style="color: white">Border Style</b>
+<select id="border-style" style="padding: 5px; border-radius: 10px; outline: none">
+<option value="" selected disabled>Select one</option>   
+<option value="dashed">Dashed</option>  
+<option value="dotted">Dotted</option>
+<option value="solid">Solid</option>
+    </select><br>
+<b style="color: white">Border Color</b>  
+<input type="color" id="border-color"><br>
+<b style="color: white">Border Radius</b>
+<input type="number" id="border-radius" style="padding: 5px; border-radius: 10px; outline: none">
+<button style="background: none; font-size: 1.4em;" id="save-frame">✅</button>
+</div>    
+    `);
+let bWidth;
+let bStyle;
+let bColor;
+let bRadius;
+    
+// oninput assign border width value to variable 
+$('#border-width').on('input', (e) => {
+bWidth = $(e.target).val(); 
+});
+
+
+// onchange assign border style value to variable 
+$('#border-style').on('change', (e) => {
+bStyle = $('#border-style').val(); 
+});
+
+
+// onchange assign border width value to variable 
+$('#border-color').on('change', (e) => {
+bColor = $(e.target).val(); 
+});
+
+
+// oninput assign border radius value to variable 
+$('#border-radius').on('input', (e) => {
+bRadius = $(e.target).val(); 
+});
+
+
+
+intervalId = $.interval(() => {
+$('main').css({
+border: `${bWidth}px ${bStyle} ${bColor}`, 'border-radius': `${bRadius}px`
+});   
+}, 500);
+
+
+// onclick return and clear interval 
+$('#save-frame').click(() => {
+  page2.hide(); 
+  page1.show();
+  $.interval(intervalId);
+});
+});  
+
+
+// save current frame apply
+$('#save-design').click(() => {
+page2.hide();
+page1.show();
+});  
+
+
+// cancel current frame apply 
+$('#hide-design').click(() => {
+page2.hide();
+page1.show();
+});    
+} 
+
+
+
+// logic for handling frame font style 
+function fs() {
+page2.show();
+page2.html(`
+<div class="design">
+<b style="color: white">Select font family</b>   
+<select id="font-style" style="padding: 5px; border-radius: 10px; outline: none">
+  <option selected disabled>Select one</option>
+  <option value="normal">Normal</option>
+  <option value="italic">Italic</option>
+  <option value="oblique">Oblique</option>  
+</select>  
+<button style="background: none; font-size: 1.4em;" onclick="page2.hide(); page1.show();">✅</button>
+</div>    
+    `);
+    
+const select = $('#font-style');
+
+select.on('change', () => {
+$('main').css('fontStyle', select.val());    
+});   
+}
+
+
+
+
+
+let flag = false;
+
+// make content editable 
+function editContent() {
+const content = $('#edit-content');
+content.css('background', 'purple');
+flag = !flag;
+
+if(flag) {
+content.css('background', 'purple');
+bgEdit = true;
+$('.out').attr('contenteditable', 'true');  
+} else {
+content.css('background', 'rgba(248, 248, 255, 1)');
+bgEdit = undefined;
+$('.out').attr('contenteditable', 'false');   
+}
+}
+
+</script>             
+</body>
+</html>
+    
+   
+   
