@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">    
+    <title>Solar</title>
+    <style>
+.panel {
+width: 20%;
+height: 40px;
+background: black;
+padding: 10px;
+border-radius: 5px;
+margin: 1px;
+border: none;
+}
+
+center {
+    margin-top: 50px;
+}
+
+b { 
+font-size: 1.4em; 
+color: white; 
+font-weight: bold;  
+}
+
+.panel {
+    background: black;
+    color: white;     
+}
+
+#bulb {
+    background: purple;
+    width: 50px;
+     height: 50px;    
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 0px 30px 30px 0px; 
+    border: none;
+}
+
+#bwidth {
+    width: 10%;
+    padding: 10px;
+    height: 50px;
+    background: black;
+    border: none;
+}
+
+body {
+    background: orange;
+    color: white;
+}
+
+.switch {
+    padding: 15px;
+    width: 20%;
+    border-radius: 15px;
+    border: 4px solid black;
+    background: blue;
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#led {
+    background: transparent;
+}        
+    </style>
+    </head>
+<body>
+    <b>Solar Voltage: <span id="volt">0%</span></b> 
+  <center style="border: 2px solid black; padding: 15px;">
+   <button class="panel"></button><button class="panel"></button><button class="panel"></button>
+  <br><button class="panel"></button><button class="panel"></button>
+  <button class="panel"></button><br><button class="panel"></button><button class="panel"></button><button class="panel"></button><br><button class="panel"></button><button class="panel"></button><button class="panel"></button><br>
+  <span class="panel">Solar Panel!</span>
+  </center>
+  <br>
+<div id="led">
+    <button id="bwidth"></button><button id="bulb"></button>
+    </div>
+<div style="background: black; padding: 10px; width: 20%; border-radius: 8px;">Led Light</div>
+
+<center>
+    <button id="btn-on" class="switch">ON</button>
+    </center>
+<script src="https://cdn.jsdelivr.net/gh/utilitiescode/jutils@1.0.5/jutils.js"></script> 
+    <script>
+let ledInterval;
+
+const volt = $('#volt');
+const bulb = $('#bulb');
+const btnOn = $('#btn-on');
+
+btnOn.click(() => {
+  if (btnOn.text() === 'ON') {
+    ledInterval = $.interval(onLed, 1000);
+    btnOn.text('OFF');
+  } else {
+    offLed();
+  }
+});
+
+function onLed() {
+  const randVolt = $.randInt(1, 10);
+  volt.text(randVolt + '%');
+  const opacity = randVolt / 10;
+  bulb.css('opacity', opacity);
+  bulb.css('background', 'white');
+}
+
+function offLed() {
+  $.interval(ledInterval);
+  volt.text('0%');
+  bulb.css('opacity', 1);
+  bulb.css('background', 'purple');
+  btnOn.text('ON');  
+}        
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
